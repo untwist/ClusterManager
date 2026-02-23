@@ -5,9 +5,12 @@
 
 import React from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
-import { AGENT_DISTRIBUTION, TOP_CONSUMERS } from '../constants';
+import { useAgentDistribution, useTopConsumers } from '../hooks/useData';
 
 export function ClusterDistribution() {
+  const AGENT_DISTRIBUTION = useAgentDistribution();
+  const TOP_CONSUMERS = useTopConsumers();
+
   return (
     <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
       <h4 className="text-sm font-bold uppercase tracking-wide mb-6">Cluster Distribution</h4>
@@ -23,7 +26,7 @@ export function ClusterDistribution() {
               paddingAngle={5}
               dataKey="value"
             >
-              {AGENT_DISTRIBUTION.map((entry, index) => (
+              {(AGENT_DISTRIBUTION ?? []).map((entry, index) => (
                 <Cell key={`cell-${index}`} fill={entry.color} />
               ))}
             </Pie>
@@ -39,7 +42,7 @@ export function ClusterDistribution() {
         </ResponsiveContainer>
       </div>
       <div className="mt-4 space-y-3">
-        {AGENT_DISTRIBUTION.map((agent) => (
+        {(AGENT_DISTRIBUTION ?? []).map((agent) => (
           <div key={agent.name} className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div
@@ -56,7 +59,7 @@ export function ClusterDistribution() {
       <div className="mt-8 pt-8 border-t border-border-dark">
         <h4 className="text-xs font-bold uppercase tracking-wide mb-4">Top Token Consumers</h4>
         <div className="space-y-3">
-          {TOP_CONSUMERS.map((consumer) => (
+          {(TOP_CONSUMERS ?? []).map((consumer) => (
             <div
               key={consumer.name}
               className="bg-slate-900/50 p-3 rounded-lg flex items-center justify-between border border-border-dark"

@@ -4,7 +4,7 @@
  */
 
 import React from 'react';
-import type { Status } from '../constants';
+import type { Status } from '../data';
 
 const config: Record<Status, { color: string; text: string; label: string }> = {
   healthy: { color: 'bg-emerald-500', text: 'text-emerald-500', label: 'Healthy' },

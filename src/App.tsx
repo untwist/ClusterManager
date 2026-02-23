@@ -3,46 +3,59 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Routes, Route, NavLink } from 'react-router-dom';
-import {
-  TrendingUp,
-  Activity,
-  Shield,
-  Gavel,
-  Users,
-  Megaphone,
-  Tag,
-  Headphones,
-  Package,
-  Code,
-  Server,
-  Settings,
-  Network,
-  LayoutDashboard,
-} from 'lucide-react';
-import { DEPARTMENTS } from './constants';
+import { Activity, Network, LayoutDashboard, Settings, GripVertical } from 'lucide-react';
+import { useDepartments } from './hooks/useData';
 import { Home } from './pages/Home';
 import { Department } from './pages/Department';
 
-const deptIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  strategy: TrendingUp,
-  finance: Activity,
-  legal: Gavel,
-  risk: Shield,
-  people: Users,
-  marketing: Megaphone,
-  sales: Tag,
-  support: Headphones,
-  product: Package,
-  engineering: Code,
-  it: Server,
-  ops: Settings,
-};
+const SIDEBAR_MIN = 220;
+const SIDEBAR_MAX = 480;
+const SIDEBAR_DEFAULT = 320;
 
 function Sidebar() {
+  const { departments, loading } = useDepartments();
+  const [width, setWidth] = useState(SIDEBAR_DEFAULT);
+  const [resizing, setResizing] = useState(false);
+
+  const onMouseMove = useCallback(
+    (e: MouseEvent) => {
+      if (!resizing) return;
+      const next = Math.min(SIDEBAR_MAX, Math.max(SIDEBAR_MIN, e.clientX));
+      setWidth(next);
+    },
+    [resizing]
+  );
+  const onMouseUp = useCallback(() => setResizing(false), []);
+
+  useEffect(() => {
+    if (!resizing) return;
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    return () => {
+      document.removeEventListener('mousemove', onMouseMove);
+      document.removeEventListener('mouseup', onMouseUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+  }, [resizing, onMouseMove, onMouseUp]);
+
   return (
-    <aside className="w-64 border-r border-border-dark flex flex-col bg-background-dark/50 overflow-y-auto no-scrollbar shrink-0">
+    <aside
+      style={{ width: `${width}px` }}
+      className="border-r border-border-dark flex flex-col bg-background-dark/50 overflow-y-auto no-scrollbar shrink-0 relative"
+    >
+      <div
+        role="separator"
+        aria-label="Resize sidebar"
+        onMouseDown={() => setResizing(true)}
+        className="absolute top-0 right-0 w-1.5 h-full cursor-col-resize hover:bg-primary/30 active:bg-primary/50 transition-colors z-10 flex items-center justify-center group"
+      >
+        <GripVertical className="w-3.5 h-3.5 text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+      </div>
       <div className="p-6 border-b border-border-dark flex items-center gap-3">
         <div className="bg-primary p-2 rounded-lg">
           <Network className="text-white w-6 h-6" />
@@ -72,36 +85,41 @@ function Sidebar() {
         <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider px-3 mb-2 mt-4">
           Departments
         </div>
-        {DEPARTMENTS.map((dept) => {
-          const Icon = deptIcons[dept.id] ?? Activity;
-          return (
-            <NavLink
-              key={dept.id}
-              to={`/department/${dept.id}`}
-              className={({ isActive }) =>
-                `w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${
-                  isActive
-                    ? 'bg-primary/10 text-primary border border-primary/20'
-                    : 'text-slate-400 hover:text-primary hover:bg-slate-800/50'
-                }`
-              }
-            >
-              <Icon className="w-5 h-5" />
-              <span className="text-sm font-medium">{dept.name.split(' (')[0]}</span>
-              <div
-                className={`ml-auto w-2 h-2 rounded-full shrink-0 ${
-                  dept.status === 'healthy'
-                    ? 'bg-emerald-500'
-                    : dept.status === 'warning'
-                      ? 'bg-amber-500'
-                      : dept.status === 'error'
-                        ? 'bg-rose-500'
-                        : 'bg-slate-500'
-                }`}
-              />
-            </NavLink>
-          );
-        })}
+        {loading ? (
+          <div className="px-3 py-2 text-slate-500 text-xs">Loading...</div>
+        ) : (
+          departments.map((dept) => {
+            const Icon = (dept.icon as React.ComponentType<{ className?: string }>) ?? Activity;
+            return (
+              <NavLink
+                key={dept.id}
+                to={`/department/${dept.id}`}
+                className={({ isActive }) =>
+                  `w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${
+                    isActive
+                      ? 'bg-primary/10 text-primary border border-primary/20'
+                      : 'text-slate-400 hover:text-primary hover:bg-slate-800/50'
+                  }`
+                }
+              >
+                <Icon className="w-5 h-5" />
+                <span className="text-sm font-medium flex-1 min-w-0 break-words">{dept.name.split(' (')[0]}</span>
+                <span className="text-[10px] font-bold text-slate-500 shrink-0">{dept.nodeCount}</span>
+                <div
+                  className={`w-2 h-2 rounded-full shrink-0 ${
+                    dept.status === 'healthy'
+                      ? 'bg-emerald-500'
+                      : dept.status === 'warning'
+                        ? 'bg-amber-500'
+                        : dept.status === 'error'
+                          ? 'bg-rose-500'
+                          : 'bg-slate-500'
+                  }`}
+                />
+              </NavLink>
+            );
+          })
+        )}
       </nav>
 
       <div className="p-4 border-t border-border-dark">
@@ -110,7 +128,7 @@ function Sidebar() {
             <span className="text-xs font-bold text-primary">JD</span>
           </div>
           <div className="flex-1 overflow-hidden min-w-0">
-            <p className="text-xs font-semibold truncate">Jane Doe</p>
+            <p className="text-xs font-semibold truncate">Toddles</p>
             <p className="text-[10px] text-slate-500 truncate italic">Cluster Lead</p>
           </div>
           <Settings className="w-4 h-4 text-slate-500 cursor-pointer hover:text-white transition-colors shrink-0" />

@@ -5,35 +5,52 @@
 
 import React, { useMemo } from 'react';
 import { TrendingUp, Database, Download, Plus, AlertTriangle, Building2, Activity } from 'lucide-react';
-import { AreaChart, Area, ResponsiveContainer } from 'recharts';
+import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import {
-  CLUSTER_SUMMARY,
-  AGENT_DISTRIBUTION,
-  DEPARTMENTS,
-  ALERTS,
-  TOKEN_TREND,
-} from '../constants';
-import { KpiCard, NodeTopology, ClusterDistribution } from '../components';
-
-function countActiveProcesses(): number {
-  return DEPARTMENTS.reduce(
-    (acc, dept) =>
-      acc + dept.processes.filter((p) => p.status === 'running').length,
-    0
-  );
-}
-
-function countTotalProcesses(): number {
-  return DEPARTMENTS.reduce((acc, dept) => acc + dept.processes.length, 0);
-}
+  useClusterSummary,
+  useAgentDistribution,
+  useDepartments,
+  useAlerts,
+  useTokenTrend,
+  useLLMModels,
+  useLLMProvider,
+  useAdAssets,
+} from '../hooks/useData';
+import { KpiCard, NodeTopology, ClusterDistribution, TokenCostLLMPanel, AdCreativeThumbnails } from '../components';
 
 export function Home() {
-  const activeProcesses = useMemo(() => countActiveProcesses(), []);
-  const totalProcesses = useMemo(() => countTotalProcesses(), []);
-  const tokenTrendData = useMemo(
-    () => TOKEN_TREND.map((value, i) => ({ day: i + 1, tokens: value })),
-    []
+  const { summary: CLUSTER_SUMMARY } = useClusterSummary();
+  const AGENT_DISTRIBUTION = useAgentDistribution();
+  const { departments } = useDepartments();
+  const ALERTS = useAlerts();
+  const TOKEN_TREND = useTokenTrend();
+  const llmModels = useLLMModels();
+  const llmProvider = useLLMProvider();
+  const { assets: adAssets, loading: adAssetsLoading } = useAdAssets(10);
+
+  const activeProcesses = useMemo(
+    () =>
+      departments.reduce(
+        (acc, dept) =>
+          acc + dept.processes.filter((p) => p.status === 'running').length,
+        0
+      ),
+    [departments]
   );
+  const totalProcesses = useMemo(
+    () => departments.reduce((acc, dept) => acc + dept.processes.length, 0),
+    [departments]
+  );
+  const tokenTrendData = useMemo(() => {
+    if (!TOKEN_TREND.length) return [];
+    const today = new Date();
+    return TOKEN_TREND.map((value, i) => {
+      const d = new Date(today);
+      d.setDate(d.getDate() - (6 - i));
+      const dateLabel = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return { date: d, dateLabel, tokens: value };
+    });
+  }, [TOKEN_TREND]);
 
   return (
     <main className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-10">
@@ -61,9 +78,9 @@ export function Home() {
         <KpiCard title="Total Agents">
           <div className="flex items-end justify-between">
             <div>
-              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY.totalAgents}</h3>
+              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY?.totalAgents ?? 0}</h3>
               <p className="text-xs font-semibold text-emerald-500 mt-1 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> {CLUSTER_SUMMARY.totalAgentsDelta}
+                <TrendingUp className="w-3 h-3" /> {CLUSTER_SUMMARY?.totalAgentsDelta ?? '—'}
               </p>
             </div>
             <div className="flex gap-1.5 mb-1 items-end h-8">
@@ -77,7 +94,7 @@ export function Home() {
             </div>
           </div>
           <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar">
-            {AGENT_DISTRIBUTION.map((a) => (
+            {(AGENT_DISTRIBUTION ?? []).map((a) => (
               <span
                 key={a.name}
                 className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400 font-bold whitespace-nowrap"
@@ -91,9 +108,9 @@ export function Home() {
         <KpiCard title="Total Tokens (24h)">
           <div className="flex items-end justify-between">
             <div>
-              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY.tokens24h}</h3>
+              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY?.tokens24h ?? '—'}</h3>
               <p className="text-xs font-semibold text-emerald-500 mt-1 flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" /> {CLUSTER_SUMMARY.tokensDelta}
+                <TrendingUp className="w-3 h-3" /> {CLUSTER_SUMMARY?.tokensDelta ?? '—'}
               </p>
             </div>
             <Database className="w-10 h-10 text-primary/20" />
@@ -101,20 +118,20 @@ export function Home() {
           <div className="mt-4 bg-slate-800 h-1 rounded-full overflow-hidden">
             <div
               className="bg-primary h-full rounded-full"
-              style={{ width: `${CLUSTER_SUMMARY.tokensThresholdPct}%` }}
+              style={{ width: `${CLUSTER_SUMMARY?.tokensThresholdPct ?? 0}%` }}
             />
           </div>
           <p className="text-[10px] text-slate-500 mt-2 font-medium">
-            {CLUSTER_SUMMARY.tokensThresholdPct}% of daily threshold reached
+            {CLUSTER_SUMMARY?.tokensThresholdPct ?? 0}% of daily threshold reached
           </p>
         </KpiCard>
 
         <KpiCard title="Avg Workload">
           <div className="flex items-end justify-between">
             <div>
-              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY.avgWorkload}%</h3>
+              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY?.avgWorkload ?? 0}%</h3>
               <p className="text-xs font-semibold text-slate-500 mt-1">
-                {CLUSTER_SUMMARY.avgWorkloadLabel}
+                {CLUSTER_SUMMARY?.avgWorkloadLabel ?? '—'}
               </p>
             </div>
             <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-500">
@@ -132,7 +149,7 @@ export function Home() {
               ))}
             </div>
             <span className="text-[10px] font-medium text-slate-500">
-              {CLUSTER_SUMMARY.nodesOptimal} nodes optimal
+              {CLUSTER_SUMMARY?.nodesOptimal ?? 0} nodes optimal
             </span>
           </div>
         </KpiCard>
@@ -142,26 +159,26 @@ export function Home() {
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Healthy Nodes</span>
               <span className="text-xs font-bold text-emerald-500">
-                {CLUSTER_SUMMARY.healthyNodes}
+                {CLUSTER_SUMMARY?.healthyNodes ?? 0}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Warning State</span>
               <span className="text-xs font-bold text-amber-500">
-                {CLUSTER_SUMMARY.warningNodes}
+                {CLUSTER_SUMMARY?.warningNodes ?? 0}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Idle/Sleep</span>
               <span className="text-xs font-bold text-slate-500">
-                {CLUSTER_SUMMARY.idleNodes}
+                {CLUSTER_SUMMARY?.idleNodes ?? 0}
               </span>
             </div>
-            {CLUSTER_SUMMARY.errorNodes > 0 && (
+            {(CLUSTER_SUMMARY?.errorNodes ?? 0) > 0 && (
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-slate-400">Error</span>
                 <span className="text-xs font-bold text-rose-500">
-                  {CLUSTER_SUMMARY.errorNodes}
+                  {CLUSTER_SUMMARY?.errorNodes ?? 0}
                 </span>
               </div>
             )}
@@ -187,7 +204,7 @@ export function Home() {
             Recent Alerts
           </h4>
           <div className="space-y-3">
-            {ALERTS.map((alert) => (
+            {(ALERTS ?? []).map((alert) => (
               <div
                 key={alert.id}
                 className={`p-3 rounded-lg border text-xs ${
@@ -211,7 +228,7 @@ export function Home() {
             Department Health
           </h4>
           <div className="grid grid-cols-2 gap-2">
-            {DEPARTMENTS.map((dept) => (
+            {(departments ?? []).map((dept) => (
               <div
                 key={dept.id}
                 className="flex items-center gap-2 p-2 rounded-lg bg-slate-800/50 border border-border-dark"
@@ -257,19 +274,50 @@ export function Home() {
         </div>
       </section>
 
+      {/* Token Cost & LLM */}
+      <section className="mb-8">
+        <TokenCostLLMPanel models={llmModels} provider={llmProvider} />
+      </section>
+
       {/* Token trend sparkline */}
       <section className="mb-8">
         <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
           <h4 className="text-sm font-bold uppercase tracking-wide mb-4">Token usage (7 days)</h4>
-          <div className="h-24 w-full">
+          <div className="h-44 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={tokenTrendData}>
+              <AreaChart data={tokenTrendData} margin={{ top: 8, right: 8, left: 48, bottom: 24 }}>
                 <defs>
                   <linearGradient id="tokenGradient" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#258cf4" stopOpacity={0.4} />
                     <stop offset="100%" stopColor="#258cf4" stopOpacity={0} />
                   </linearGradient>
                 </defs>
+                <XAxis
+                  dataKey="dateLabel"
+                  stroke="currentColor"
+                  className="text-slate-500 text-[11px]"
+                  tick={{ fill: 'currentColor' }}
+                  interval="preserveStartEnd"
+                />
+                <YAxis
+                  dataKey="tokens"
+                  tickFormatter={(v) => `${v}M`}
+                  width={44}
+                  stroke="currentColor"
+                  className="text-slate-500 text-[11px]"
+                  tick={{ fill: 'currentColor' }}
+                  domain={['dataMin - 0.2', 'dataMax + 0.2']}
+                  tickCount={5}
+                />
+                <Tooltip
+                  formatter={(value: number) => [`${value}M tokens`, 'Tokens']}
+                  labelFormatter={(label, payload) => {
+                    const p = payload?.[0]?.payload as { date?: Date } | undefined;
+                    return p?.date ? p.date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' }) : label;
+                  }}
+                  contentStyle={{ backgroundColor: 'rgb(30 41 59)', border: '1px solid rgb(51 65 85)', borderRadius: '8px' }}
+                  labelStyle={{ color: 'rgb(203 213 225)' }}
+                />
                 <Area
                   type="monotone"
                   dataKey="tokens"
@@ -284,7 +332,7 @@ export function Home() {
       </section>
 
       {/* Main grid: Cluster Distribution + Node Topology */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
         <div className="xl:col-span-2">
           <ClusterDistribution />
         </div>
@@ -292,6 +340,14 @@ export function Home() {
           <NodeTopology />
         </div>
       </div>
+
+      {/* Lower section: Campaign creatives – Mekhala Orchard / advertising pipeline */}
+      <AdCreativeThumbnails
+        assets={adAssets}
+        loading={adAssetsLoading}
+        title="Campaign creatives"
+        subtitle="Advertising pipeline – digital ads & video (Mekhala Orchard)"
+      />
     </main>
   );
 }

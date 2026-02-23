@@ -5,7 +5,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
 import {
   Download,
   Plus,
@@ -14,42 +13,65 @@ import {
   AlertCircle,
   Clock,
   RotateCw,
-  FileText,
-  Cpu,
+  Network,
 } from 'lucide-react';
-import { DEPARTMENTS } from '../constants';
-import { StatusBadge, KpiCard, NodeTopology, ClusterDistribution } from '../components';
-import { CLUSTER_SUMMARY, AGENT_DISTRIBUTION } from '../constants';
+import {
+  useDepartment,
+  useDepartmentNodes,
+  useDepartmentTopology,
+  useClusterSummary,
+  useAgentDistribution,
+  useAgents,
+  useAdAssets,
+} from '../hooks/useData';
+import { StatusBadge, KpiCard, ClusterDistribution, DepartmentNodeTopology, TaskWorkflowCard, CreativeProviderHooks, AdCreativeThumbnails } from '../components';
 
 export function Department() {
   const { deptId } = useParams<{ deptId: string }>();
   const navigate = useNavigate();
   const [activeProcessId, setActiveProcessId] = useState<string | null>(null);
 
-  const activeDept = useMemo(
-    () => DEPARTMENTS.find((d) => d.id === deptId) ?? DEPARTMENTS[1],
-    [deptId]
+  const { department: activeDept, loading: deptLoading } = useDepartment(deptId);
+  const { nodeCount } = useDepartmentNodes(deptId);
+  const { topology } = useDepartmentTopology(deptId);
+  const { summary: CLUSTER_SUMMARY } = useClusterSummary();
+  const AGENT_DISTRIBUTION = useAgentDistribution();
+  const allAgents = useAgents();
+  const { assets: adAssets, loading: adAssetsLoading } = useAdAssets(10);
+
+  const agentsMap = useMemo(
+    () => Object.fromEntries(allAgents.map((a) => [a.id, a])),
+    [allAgents]
   );
 
   const activeProcess = useMemo(
     () =>
-      activeProcessId
+      activeDept && activeProcessId
         ? activeDept.processes.find((p) => p.id === activeProcessId) ?? activeDept.processes[0]
-        : activeDept.processes[0],
+        : activeDept?.processes[0],
     [activeDept, activeProcessId]
   );
 
-  // If dept has processes and none selected, set first process
   React.useEffect(() => {
-    if (activeDept.processes.length > 0 && !activeProcessId) {
+    if (activeDept?.processes.length && !activeProcessId) {
       setActiveProcessId(activeDept.processes[0].id);
     }
   }, [activeDept, activeProcessId]);
 
-  // Redirect to home if invalid dept
-  if (!DEPARTMENTS.some((d) => d.id === deptId)) {
+  if (!deptId) {
     navigate('/', { replace: true });
     return null;
+  }
+  if (!deptLoading && !activeDept) {
+    navigate('/', { replace: true });
+    return null;
+  }
+  if (!activeDept) {
+    return (
+      <main className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-10 flex items-center justify-center">
+        <p className="text-slate-500">Loading department…</p>
+      </main>
+    );
   }
 
   return (
@@ -88,16 +110,27 @@ export function Department() {
         </div>
       </header>
 
-      {/* KPI Cards (same as Home for consistency) */}
+      {/* KPI Cards: Nodes allocated first, then cluster summary */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <KpiCard title={`Nodes allocated to ${activeDept.name.split(' (')[0]}`}>
+          <div className="flex items-end justify-between">
+            <div>
+              <h3 className="text-3xl font-black">{nodeCount}</h3>
+              <p className="text-xs font-semibold text-emerald-500 mt-1">department nodes</p>
+            </div>
+            <Network className="w-10 h-10 text-primary/20" />
+          </div>
+          <p className="text-[10px] text-slate-500 mt-2 font-medium">Role topology below</p>
+        </KpiCard>
+
         <KpiCard title="Total Agents">
           <div className="flex items-end justify-between">
             <div>
-              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY.totalAgents}</h3>
-              <p className="text-xs font-semibold text-emerald-500 mt-1">{CLUSTER_SUMMARY.totalAgentsDelta}</p>
+              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY?.totalAgents ?? 0}</h3>
+              <p className="text-xs font-semibold text-emerald-500 mt-1">{CLUSTER_SUMMARY?.totalAgentsDelta ?? '—'}</p>
             </div>
             <div className="flex gap-1.5 mb-1 items-end h-8">
-              {AGENT_DISTRIBUTION.slice(0, 4).map((_, i) => (
+              {(AGENT_DISTRIBUTION ?? []).slice(0, 4).map((_, i) => (
                 <div
                   key={i}
                   className="w-1.5 bg-primary rounded-full"
@@ -107,7 +140,7 @@ export function Department() {
             </div>
           </div>
           <div className="mt-4 flex gap-2 overflow-x-auto no-scrollbar">
-            {AGENT_DISTRIBUTION.map((a) => (
+            {(AGENT_DISTRIBUTION ?? []).map((a) => (
               <span key={a.name} className="text-[10px] bg-slate-800 px-2 py-1 rounded text-slate-400 font-bold whitespace-nowrap">
                 {a.name}: {a.value}
               </span>
@@ -118,42 +151,29 @@ export function Department() {
         <KpiCard title="Total Tokens (24h)">
           <div className="flex items-end justify-between">
             <div>
-              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY.tokens24h}</h3>
-              <p className="text-xs font-semibold text-emerald-500 mt-1">{CLUSTER_SUMMARY.tokensDelta}</p>
+              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY?.tokens24h ?? '—'}</h3>
+              <p className="text-xs font-semibold text-emerald-500 mt-1">{CLUSTER_SUMMARY?.tokensDelta ?? '—'}</p>
             </div>
           </div>
           <div className="mt-4 bg-slate-800 h-1 rounded-full overflow-hidden">
-            <div className="bg-primary h-full rounded-full" style={{ width: `${CLUSTER_SUMMARY.tokensThresholdPct}%` }} />
+            <div className="bg-primary h-full rounded-full" style={{ width: `${CLUSTER_SUMMARY?.tokensThresholdPct ?? 0}%` }} />
           </div>
-          <p className="text-[10px] text-slate-500 mt-2 font-medium">{CLUSTER_SUMMARY.tokensThresholdPct}% of daily threshold</p>
-        </KpiCard>
-
-        <KpiCard title="Avg Workload">
-          <div className="flex items-end justify-between">
-            <div>
-              <h3 className="text-3xl font-black">{CLUSTER_SUMMARY.avgWorkload}%</h3>
-              <p className="text-xs font-semibold text-slate-500 mt-1">{CLUSTER_SUMMARY.avgWorkloadLabel}</p>
-            </div>
-            <div className="flex items-center justify-center w-12 h-12 rounded-full border-4 border-emerald-500/20 border-t-emerald-500">
-              <span className="text-[10px] font-bold">HIGH</span>
-            </div>
-          </div>
-          <span className="text-[10px] font-medium text-slate-500">{CLUSTER_SUMMARY.nodesOptimal} nodes optimal</span>
+          <p className="text-[10px] text-slate-500 mt-2 font-medium">{CLUSTER_SUMMARY?.tokensThresholdPct ?? 0}% of daily threshold</p>
         </KpiCard>
 
         <KpiCard title="Cluster Status">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Healthy</span>
-              <span className="text-xs font-bold text-emerald-500">{CLUSTER_SUMMARY.healthyNodes}</span>
+              <span className="text-xs font-bold text-emerald-500">{CLUSTER_SUMMARY?.healthyNodes ?? 0}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Warning</span>
-              <span className="text-xs font-bold text-amber-500">{CLUSTER_SUMMARY.warningNodes}</span>
+              <span className="text-xs font-bold text-amber-500">{CLUSTER_SUMMARY?.warningNodes ?? 0}</span>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Idle/Sleep</span>
-              <span className="text-xs font-bold text-slate-500">{CLUSTER_SUMMARY.idleNodes}</span>
+              <span className="text-xs font-bold text-slate-500">{CLUSTER_SUMMARY?.idleNodes ?? 0}</span>
             </div>
           </div>
           <div className="mt-4 grid grid-cols-10 gap-1">
@@ -225,82 +245,48 @@ export function Department() {
             </div>
           </div>
 
-          {/* Task Flow */}
+          {/* Task Flow with assigned agents and workflow */}
           {activeProcess && activeProcess.tasks.length > 0 && (
             <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
-              <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center justify-between mb-6">
                 <div>
                   <h4 className="text-sm font-bold uppercase tracking-wide">{activeProcess.name}: Task Flow</h4>
-                  <p className="text-[11px] text-slate-500 font-medium mt-1">Real-time execution log (Agent: AG2-Cluster-04)</p>
-                </div>
-                <div className="flex -space-x-2">
-                  {[1, 2].map((i) => (
-                    <div key={i} className="w-8 h-8 rounded-full bg-slate-800 border-2 border-card-dark flex items-center justify-center">
-                      <Cpu className="w-4 h-4 text-primary" />
-                    </div>
-                  ))}
+                  <p className="text-[11px] text-slate-500 font-medium mt-1">Assigned agents and workflow steps</p>
                 </div>
               </div>
 
               <div className="space-y-6 relative">
                 <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-slate-800 z-0" />
                 {activeProcess.tasks.map((task) => (
-                  <div key={task.id} className="relative z-10 flex gap-4">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center shadow-lg ${
-                        task.status === 'healthy'
-                          ? 'bg-emerald-500 text-white shadow-emerald-500/20'
-                          : task.status === 'running'
-                            ? 'bg-primary text-white shadow-primary/20'
-                            : 'bg-slate-800 text-slate-500'
-                      }`}
-                    >
-                      {task.status === 'healthy' ? (
-                        <CheckCircle2 className="w-4 h-4" />
-                      ) : task.status === 'running' ? (
-                        <RotateCw className="w-4 h-4 animate-spin" />
-                      ) : task.id === 'packet' ? (
-                        <FileText className="w-4 h-4" />
-                      ) : (
-                        <Clock className="w-4 h-4" />
-                      )}
-                    </div>
-                    <div className={`flex-1 pt-1 ${task.status === 'idle' ? 'opacity-50' : ''}`}>
-                      <div className="flex items-center justify-between">
-                        <h6 className="text-sm font-bold">{task.name}</h6>
-                        <span
-                          className={`text-[10px] font-bold uppercase ${task.status === 'running' ? 'text-primary' : 'text-slate-500'}`}
-                        >
-                          {task.timestamp ?? (task.status === 'running' ? 'Running...' : 'Pending')}
-                        </span>
-                      </div>
-                      <p className="text-xs text-slate-500 mt-1">{task.description}</p>
-                      {task.progress != null && (
-                        <div className="mt-3 bg-slate-800 rounded-lg p-3">
-                          <div className="flex justify-between items-center mb-1.5">
-                            <span className="text-[10px] font-bold text-slate-500">PROGRESS</span>
-                            <span className="text-[10px] font-bold text-primary">{task.progress}%</span>
-                          </div>
-                          <div className="h-1 bg-slate-700 rounded-full overflow-hidden">
-                            <motion.div
-                              initial={{ width: 0 }}
-                              animate={{ width: `${task.progress}%` }}
-                              className="h-full bg-primary"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
+                  <div key={task.id} className="relative z-10 pl-0">
+                    <TaskWorkflowCard
+                      task={task}
+                      agents={(task.assignedAgentIds ?? []).map((id) => agentsMap[id] ?? null)}
+                    />
                   </div>
                 ))}
               </div>
             </div>
           )}
+
+          {activeDept.id === 'marketing' && (
+            <AdCreativeThumbnails
+              assets={adAssets}
+              loading={adAssetsLoading}
+              title="Campaign creatives"
+              subtitle="Advertising pipeline – digital ads & video (Mekhala Orchard)"
+            />
+          )}
         </div>
 
         <div className="space-y-6">
+          <DepartmentNodeTopology
+            roles={topology?.roles ?? []}
+            edges={topology?.edges ?? []}
+            title={`${activeDept.name.split(' (')[0]} – Role Topology`}
+          />
+          {activeDept.id === 'marketing' && <CreativeProviderHooks />}
           <ClusterDistribution />
-          <NodeTopology />
         </div>
       </div>
     </main>
