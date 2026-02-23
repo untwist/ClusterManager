@@ -41,7 +41,7 @@ export function AdCreativeThumbnails({
 
   if (loading) {
     return (
-      <section className="mb-8">
+      <section className="mb-5">
         <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
           <h4 className="text-sm font-bold uppercase tracking-wide mb-2 flex items-center gap-2">
             <Megaphone className="w-4 h-4 text-primary" />
@@ -59,7 +59,7 @@ export function AdCreativeThumbnails({
   }
 
   return (
-    <section className="mb-8">
+    <section className="mb-5">
       <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
         <h4 className="text-sm font-bold uppercase tracking-wide mb-2 flex items-center gap-2">
           <Megaphone className="w-4 h-4 text-primary" />

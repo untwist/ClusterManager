@@ -53,8 +53,8 @@ export function Home() {
   }, [TOKEN_TREND]);
 
   return (
-    <main className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-10">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <main className="flex-1 overflow-y-auto no-scrollbar p-4 lg:p-6">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
         <div>
           <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-2">
             <span className="text-slate-100">Home</span>
@@ -74,7 +74,7 @@ export function Home() {
       </header>
 
       {/* KPI Cards */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         <KpiCard title="Total Agents">
           <div className="flex items-end justify-between">
             <div>
@@ -197,7 +197,7 @@ export function Home() {
       </section>
 
       {/* Alerts + Department Health + Active Processes */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <section className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-5">
         <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
           <h4 className="text-sm font-bold uppercase tracking-wide mb-4 flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-500" />
@@ -275,12 +275,12 @@ export function Home() {
       </section>
 
       {/* Token Cost & LLM */}
-      <section className="mb-8">
+      <section className="mb-5">
         <TokenCostLLMPanel models={llmModels} provider={llmProvider} />
       </section>
 
       {/* Token trend sparkline */}
-      <section className="mb-8">
+      <section className="mb-5">
         <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
           <h4 className="text-sm font-bold uppercase tracking-wide mb-4">Token usage (7 days)</h4>
           <div className="h-44 w-full">
@@ -332,7 +332,7 @@ export function Home() {
       </section>
 
       {/* Main grid: Cluster Distribution + Node Topology */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 mb-5">
         <div className="xl:col-span-2">
           <ClusterDistribution />
         </div>

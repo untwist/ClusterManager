@@ -68,15 +68,15 @@ export function Department() {
   }
   if (!activeDept) {
     return (
-      <main className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-10 flex items-center justify-center">
+      <main className="flex-1 overflow-y-auto no-scrollbar p-4 lg:p-6 flex items-center justify-center">
         <p className="text-slate-500">Loading department…</p>
       </main>
     );
   }
 
   return (
-    <main className="flex-1 overflow-y-auto no-scrollbar p-6 lg:p-10">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <main className="flex-1 overflow-y-auto no-scrollbar p-4 lg:p-6">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-5">
         <div>
           <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 mb-2">
             <Link to="/" className="hover:text-primary cursor-pointer">
@@ -111,7 +111,7 @@ export function Department() {
       </header>
 
       {/* KPI Cards: Nodes allocated first, then cluster summary */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
         <KpiCard title={`Nodes allocated to ${activeDept.name.split(' (')[0]}`}>
           <div className="flex items-end justify-between">
             <div>
@@ -184,8 +184,8 @@ export function Department() {
         </KpiCard>
       </section>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2 space-y-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5">
+        <div className="xl:col-span-2 space-y-5">
           {/* Process List */}
           <div className="bg-card-dark rounded-xl border border-border-dark overflow-hidden shadow-sm">
             <div className="px-6 py-4 border-b border-border-dark flex items-center justify-between bg-slate-800/30">
@@ -279,7 +279,7 @@ export function Department() {
           )}
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <DepartmentNodeTopology
             roles={topology?.roles ?? []}
             edges={topology?.edges ?? []}
