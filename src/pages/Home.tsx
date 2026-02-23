@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { TrendingUp, Database, Download, Plus, AlertTriangle, Building2, Activity } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip } from 'recharts';
 import {
@@ -19,6 +19,7 @@ import {
 import { KpiCard, NodeTopology, ClusterDistribution, TokenCostLLMPanel, AdCreativeThumbnails } from '../components';
 
 export function Home() {
+  const [newAgentDialogOpen, setNewAgentDialogOpen] = useState(false);
   const { summary: CLUSTER_SUMMARY } = useClusterSummary();
   const AGENT_DISTRIBUTION = useAgentDistribution();
   const { departments } = useDepartments();
@@ -66,12 +67,45 @@ export function Home() {
             <Download className="w-4 h-4" />
             Export Report
           </button>
-          <button className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-lg shadow-primary/20">
+          <button
+            type="button"
+            onClick={() => setNewAgentDialogOpen(true)}
+            className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors flex items-center gap-2 shadow-lg shadow-primary/20"
+          >
             <Plus className="w-4 h-4" />
             New Agent
           </button>
         </div>
       </header>
+
+      {/* New Agent placeholder dialog */}
+      {newAgentDialogOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="new-agent-dialog-title"
+        >
+          <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-xl max-w-md w-full">
+            <h3 id="new-agent-dialog-title" className="text-lg font-bold text-slate-100 mb-3">
+              New Agent
+            </h3>
+            <p className="text-slate-300 text-sm mb-6">
+              This doesn&apos;t work yet, Todd! Please stop clicking this button. (action logged...
+              again)
+            </p>
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setNewAgentDialogOpen(false)}
+                className="px-4 py-2 rounded-lg bg-primary text-white text-sm font-semibold hover:bg-primary/90 transition-colors"
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* KPI Cards */}
       <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
