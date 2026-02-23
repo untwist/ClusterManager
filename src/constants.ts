@@ -132,7 +132,7 @@ export const DEPARTMENTS: Department[] = [
     id: 'legal',
     name: 'Legal, Compliance, Privacy',
     icon: Gavel,
-    status: 'healthy',
+    status: 'idle',
     processes: []
   },
   {
@@ -140,7 +140,71 @@ export const DEPARTMENTS: Department[] = [
     name: 'Risk and Security',
     icon: Shield,
     status: 'healthy',
-    processes: []
+    processes: [
+      {
+        id: 'ai-infra-security',
+        name: 'AI & Infrastructure Security',
+        status: 'running',
+        workload: 68,
+        tokens: '890k',
+        description: 'Active - 5/8 tasks in progress or complete',
+        tasks: [
+          {
+            id: 'prompt-injection-detection',
+            name: 'Prompt Injection Detection',
+            status: 'running',
+            description: 'Scanning LLM inputs/outputs for injection patterns; 3 suspicious payloads flagged in last 24h.',
+            progress: 72
+          },
+          {
+            id: 'firewall-monitoring',
+            name: 'Firewall Monitoring',
+            status: 'healthy',
+            description: 'All edge and WAF rules nominal. Block list updated; no anomalous egress.',
+            timestamp: 'Completed 1h ago'
+          },
+          {
+            id: 'threat-intel-feed',
+            name: 'Threat Intelligence Feed',
+            status: 'running',
+            description: 'Ingesting OSINT and vendor feeds; correlating IOCs with agent traffic.',
+            progress: 45
+          },
+          {
+            id: 'access-identity-audit',
+            name: 'Access & Identity Audit',
+            status: 'healthy',
+            description: 'SSO and IDP events reviewed. No privilege escalation or suspicious logins.',
+            timestamp: 'Completed 4h ago'
+          },
+          {
+            id: 'vulnerability-scanning',
+            name: 'Vulnerability Scanning',
+            status: 'warning',
+            description: '2 low-severity CVEs on agent API endpoints; remediation scheduled.'
+          },
+          {
+            id: 'dlp-monitoring',
+            name: 'Data Loss Prevention (DLP)',
+            status: 'healthy',
+            description: 'Sensitive data checks on agent I/O and storage; no policy violations.',
+            timestamp: 'Completed 6h ago'
+          },
+          {
+            id: 'incident-triage',
+            name: 'Incident Triage',
+            status: 'idle',
+            description: 'Classify and route security alerts; escalate critical events to CISO.'
+          },
+          {
+            id: 'compliance-checks',
+            name: 'Compliance Checks',
+            status: 'idle',
+            description: 'SOC2 and GDPR policy checks on agent behavior and data handling.'
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'people',
@@ -160,7 +224,7 @@ export const DEPARTMENTS: Department[] = [
     id: 'sales',
     name: 'Sales and Partnerships',
     icon: Tag,
-    status: 'healthy',
+    status: 'idle',
     processes: []
   },
   {
@@ -189,7 +253,59 @@ export const DEPARTMENTS: Department[] = [
     name: 'IT and Workplace Tech',
     icon: Server,
     status: 'healthy',
-    processes: []
+    processes: [
+      {
+        id: 'agent-lifecycle-ops',
+        name: 'Agent Lifecycle & Operations',
+        status: 'running',
+        workload: 58,
+        tokens: '310k',
+        description: 'Active - 4/6 tasks in progress or complete',
+        tasks: [
+          {
+            id: 'deploy-agents-cloud',
+            name: 'Deploy Agents to Cloud',
+            status: 'running',
+            description: 'Rolling out new agent runtimes to AWS and GCP; Azure staging next. 12/18 nodes provisioned.',
+            progress: 68
+          },
+          {
+            id: 'manage-runtimes',
+            name: 'Manage Agent Runtimes',
+            status: 'healthy',
+            description: 'Scale, health checks, and failover for all agent clusters. All runtimes nominal.',
+            timestamp: 'Completed 30m ago'
+          },
+          {
+            id: 'upgrade-agents',
+            name: 'Upgrade Agents (Model / Runtime)',
+            status: 'running',
+            description: 'Model and dependency upgrades for Finance and Risk clusters; rollout in phases.',
+            progress: 40
+          },
+          {
+            id: 'repurpose-agents',
+            name: 'Repurpose Agents',
+            status: 'idle',
+            description: 'Reassign or reconfigure idle agents to new departments or use cases. Queue: 3 candidates.'
+          },
+          {
+            id: 'capacity-cost-tracking',
+            name: 'Capacity & Cost Tracking',
+            status: 'healthy',
+            description: 'Token usage by cloud and department; budget alerts and right-sizing recommendations.',
+            timestamp: 'Completed 2h ago'
+          },
+          {
+            id: 'governance-change-control',
+            name: 'Governance & Change Control',
+            status: 'healthy',
+            description: 'Approval workflows for new agent rollouts; no outstanding change requests.',
+            timestamp: 'Completed 1d ago'
+          }
+        ]
+      }
+    ]
   },
   {
     id: 'ops',
@@ -237,9 +353,9 @@ export const CLUSTER_SUMMARY: ClusterSummary = {
   avgWorkload: 68,
   avgWorkloadLabel: 'Stable Cluster Health',
   nodesOptimal: 92,
-  healthyNodes: 128,
+  healthyNodes: 27,
   warningNodes: 11,
-  idleNodes: 3,
+  idleNodes: 104,
   errorNodes: 0,
 };
 

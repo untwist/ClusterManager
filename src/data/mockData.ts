@@ -45,10 +45,18 @@ export const MOCK_AGENTS: Agent[] = [
   { id: 'agent-mkt-4', name: 'Media-Plan-1', roleTitle: 'Media Planner', departmentId: 'marketing' },
   { id: 'agent-legal-1', name: 'Legal-Agent-Alpha', roleTitle: 'Contract Analysis', departmentId: 'legal' },
   { id: 'agent-risk-1', name: 'Risk-Shield-09', roleTitle: 'Fraud Detection', departmentId: 'risk' },
+  { id: 'agent-risk-2', name: 'Guard-LLM-3', roleTitle: 'Security Engineer', departmentId: 'risk' },
+  { id: 'agent-risk-3', name: 'Threat-Scan-7', roleTitle: 'Risk Analyst', departmentId: 'risk' },
   { id: 'agent-eng-1', name: 'Build-Bot-12', roleTitle: 'Software Engineer', departmentId: 'engineering' },
   { id: 'agent-eng-2', name: 'Pipe-Data-07', roleTitle: 'Data Engineer', departmentId: 'engineering' },
   { id: 'agent-eng-3', name: 'Model-Train-4', roleTitle: 'ML Engineer', departmentId: 'engineering' },
   { id: 'agent-eng-4', name: 'Tech-Lead-1', roleTitle: 'Tech Lead', departmentId: 'engineering' },
+  { id: 'agent-it-1', name: 'Infra-Node-7', roleTitle: 'Sys Admin', departmentId: 'it' },
+  { id: 'agent-it-2', name: 'Ops-Govern-2', roleTitle: 'Help Desk', departmentId: 'it' },
+  { id: 'agent-prod-1', name: 'OpenClaw-Research-1', roleTitle: 'Product Manager', departmentId: 'product' },
+  { id: 'agent-prod-2', name: 'AgentZero-Orchestrator-1', roleTitle: 'Product Owner', departmentId: 'product' },
+  { id: 'agent-prod-3', name: 'CrewAI-Lead-1', roleTitle: 'Product Manager', departmentId: 'product' },
+  { id: 'agent-prod-4', name: 'Agentic-Platform-PM', roleTitle: 'Chief Product Officer', departmentId: 'product' },
 ];
 
 const financeTasks: Task[] = [
@@ -317,6 +325,192 @@ const engineeringProcesses: Process[] = [
   },
 ];
 
+/** Risk and Security: AI security, infra monitoring, incident response */
+const riskSecurityTasks: Task[] = [
+  {
+    id: 'prompt-injection-detection',
+    name: 'Prompt Injection Detection',
+    status: 'running',
+    description: 'Scanning LLM inputs/outputs for injection patterns; 3 suspicious payloads flagged in last 24h.',
+    progress: 72,
+    assignedAgentIds: ['agent-risk-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-2', role: 'Security Engineer', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'firewall-monitoring',
+    name: 'Firewall Monitoring',
+    status: 'healthy',
+    description: 'All edge and WAF rules nominal. Block list updated; no anomalous egress.',
+    timestamp: 'Completed 1h ago',
+    assignedAgentIds: ['agent-risk-2', 'agent-risk-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-2', role: 'Security Engineer', status: 'approved' },
+      { order: 2, agentId: 'agent-risk-3', role: 'Risk Analyst', status: 'approved', approvedBy: 'agent-risk-2' },
+    ],
+  },
+  {
+    id: 'threat-intel-feed',
+    name: 'Threat Intelligence Feed',
+    status: 'running',
+    description: 'Ingesting OSINT and vendor feeds; correlating IOCs with agent traffic.',
+    progress: 45,
+    assignedAgentIds: ['agent-risk-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-3', role: 'Risk Analyst', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'access-identity-audit',
+    name: 'Access & Identity Audit',
+    status: 'healthy',
+    description: 'SSO and IDP events reviewed. No privilege escalation or suspicious logins.',
+    timestamp: 'Completed 4h ago',
+    assignedAgentIds: ['agent-risk-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-2', role: 'Security Engineer', status: 'approved' },
+    ],
+  },
+  {
+    id: 'vulnerability-scanning',
+    name: 'Vulnerability Scanning',
+    status: 'warning',
+    description: '2 low-severity CVEs on agent API endpoints; remediation scheduled.',
+    assignedAgentIds: ['agent-risk-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-2', role: 'Security Engineer', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'dlp-monitoring',
+    name: 'Data Loss Prevention (DLP)',
+    status: 'healthy',
+    description: 'Sensitive data checks on agent I/O and storage; no policy violations.',
+    timestamp: 'Completed 6h ago',
+    assignedAgentIds: ['agent-risk-1', 'agent-risk-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-1', role: 'Fraud Detection', status: 'approved' },
+      { order: 2, agentId: 'agent-risk-3', role: 'Risk Analyst', status: 'approved', approvedBy: 'agent-risk-2' },
+    ],
+  },
+  {
+    id: 'incident-triage',
+    name: 'Incident Triage',
+    status: 'idle',
+    description: 'Classify and route security alerts; escalate critical events to CISO.',
+    assignedAgentIds: ['agent-risk-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-3', role: 'Risk Analyst', status: 'pending' },
+    ],
+  },
+  {
+    id: 'compliance-checks',
+    name: 'Compliance Checks',
+    status: 'idle',
+    description: 'SOC2 and GDPR policy checks on agent behavior and data handling.',
+    assignedAgentIds: ['agent-risk-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-risk-3', role: 'Risk Analyst', status: 'pending' },
+    ],
+  },
+];
+
+const riskSecurityProcesses: Process[] = [
+  {
+    id: 'ai-infra-security',
+    name: 'AI & Infrastructure Security',
+    status: 'running',
+    workload: 68,
+    tokens: '890k',
+    description: 'Active - 5/8 tasks in progress or complete',
+    tasks: riskSecurityTasks,
+  },
+];
+
+/** IT and Workplace Tech: deploy, manage, upgrade, repurpose agents across clouds; capacity and governance */
+const itTasks: Task[] = [
+  {
+    id: 'deploy-agents-cloud',
+    name: 'Deploy Agents to Cloud',
+    status: 'running',
+    description: 'Rolling out new agent runtimes to AWS and GCP; Azure staging next. 12/18 nodes provisioned.',
+    progress: 68,
+    assignedAgentIds: ['agent-it-1'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-it-1', role: 'Sys Admin', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'manage-runtimes',
+    name: 'Manage Agent Runtimes',
+    status: 'healthy',
+    description: 'Scale, health checks, and failover for all agent clusters. All runtimes nominal.',
+    timestamp: 'Completed 30m ago',
+    assignedAgentIds: ['agent-it-1', 'agent-it-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-it-1', role: 'Sys Admin', status: 'approved', approvedBy: 'agent-it-2' },
+      { order: 2, agentId: 'agent-it-2', role: 'Help Desk', status: 'approved' },
+    ],
+  },
+  {
+    id: 'upgrade-agents',
+    name: 'Upgrade Agents (Model / Runtime)',
+    status: 'running',
+    description: 'Model and dependency upgrades for Finance and Risk clusters; rollout in phases.',
+    progress: 40,
+    assignedAgentIds: ['agent-it-1'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-it-1', role: 'Sys Admin', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'repurpose-agents',
+    name: 'Repurpose Agents',
+    status: 'idle',
+    description: 'Reassign or reconfigure idle agents to new departments or use cases. Queue: 3 candidates.',
+    assignedAgentIds: ['agent-it-1', 'agent-it-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-it-1', role: 'Sys Admin', status: 'pending' },
+      { order: 2, agentId: 'agent-it-2', role: 'Help Desk', status: 'pending' },
+    ],
+  },
+  {
+    id: 'capacity-cost-tracking',
+    name: 'Capacity & Cost Tracking',
+    status: 'healthy',
+    description: 'Token usage by cloud and department; budget alerts and right-sizing recommendations.',
+    timestamp: 'Completed 2h ago',
+    assignedAgentIds: ['agent-it-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-it-2', role: 'Help Desk', status: 'approved' },
+    ],
+  },
+  {
+    id: 'governance-change-control',
+    name: 'Governance & Change Control',
+    status: 'healthy',
+    description: 'Approval workflows for new agent rollouts; no outstanding change requests.',
+    timestamp: 'Completed 1d ago',
+    assignedAgentIds: ['agent-it-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-it-2', role: 'Help Desk', status: 'approved' },
+    ],
+  },
+];
+
+const itProcesses: Process[] = [
+  {
+    id: 'agent-lifecycle-ops',
+    name: 'Agent Lifecycle & Operations',
+    status: 'running',
+    workload: 58,
+    tokens: '310k',
+    description: 'Active - 4/6 tasks in progress or complete',
+    tasks: itTasks,
+  },
+];
+
 const peopleOpsTasks: Task[] = [
   {
     id: 'layoff-notices',
@@ -340,18 +534,124 @@ const peopleOpsProcesses: Process[] = [
   },
 ];
 
+const productTasksOpenClaw: Task[] = [
+  {
+    id: 'openclaw-tool-pipeline',
+    name: 'OpenClaw tool-use pipeline',
+    status: 'running',
+    description: 'Integrate tool-calling and code execution into OpenClaw research workflows.',
+    progress: 60,
+    assignedAgentIds: ['agent-prod-1', 'agent-prod-4'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-prod-4', role: 'Chief Product Officer', status: 'approved' },
+      { order: 2, agentId: 'agent-prod-1', role: 'Product Manager', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'openclaw-research-agents',
+    name: 'OpenClaw research agent rollout',
+    status: 'idle',
+    description: 'Deploy and scale OpenClaw research agents across product discovery and competitive intel.',
+    assignedAgentIds: ['agent-prod-1'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-prod-1', role: 'Product Manager', status: 'pending' },
+    ],
+  },
+];
+
+const productTasksAgentZero: Task[] = [
+  {
+    id: 'agentzero-orchestration',
+    name: 'AgentZero multi-agent orchestration',
+    status: 'healthy',
+    description: 'Multi-agent debate and orchestration layer deployed; 3 agent pools live.',
+    timestamp: 'Completed 1d ago',
+    assignedAgentIds: ['agent-prod-2', 'agent-prod-4'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-prod-4', role: 'Chief Product Officer', status: 'approved' },
+      { order: 2, agentId: 'agent-prod-2', role: 'Product Owner', status: 'approved' },
+    ],
+  },
+  {
+    id: 'agentzero-code-gen',
+    name: 'AgentZero code-gen agent templates',
+    status: 'running',
+    description: 'Standardize code-generation and review agent templates for engineering handoff.',
+    progress: 40,
+    assignedAgentIds: ['agent-prod-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-prod-2', role: 'Product Owner', status: 'in_progress' },
+    ],
+  },
+];
+
+const productTasksCrewAI: Task[] = [
+  {
+    id: 'crewai-templates',
+    name: 'CrewAI crew template library',
+    status: 'running',
+    description: 'Build reusable crew templates (roles, tasks, handoffs) for PM and support workflows.',
+    progress: 55,
+    assignedAgentIds: ['agent-prod-3', 'agent-prod-4'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-prod-4', role: 'Chief Product Officer', status: 'approved' },
+      { order: 2, agentId: 'agent-prod-3', role: 'Product Manager', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'crewai-rollout',
+    name: 'CrewAI instance rollout',
+    status: 'idle',
+    description: 'Roll out CrewAI-based crews for backlog grooming and customer insight synthesis.',
+    assignedAgentIds: ['agent-prod-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-prod-3', role: 'Product Manager', status: 'pending' },
+    ],
+  },
+];
+
+const productProcesses: Process[] = [
+  {
+    id: 'openclaw-development',
+    name: 'OpenClaw development',
+    status: 'running',
+    workload: 60,
+    tokens: '310k',
+    description: 'Active - Tool pipeline and research agents in progress',
+    tasks: productTasksOpenClaw,
+  },
+  {
+    id: 'agentzero-development',
+    name: 'AgentZero (Agent0) development',
+    status: 'running',
+    workload: 70,
+    tokens: '440k',
+    description: 'Active - Orchestration live; code-gen templates in progress',
+    tasks: productTasksAgentZero,
+  },
+  {
+    id: 'crewai-development',
+    name: 'CrewAI development',
+    status: 'running',
+    workload: 55,
+    tokens: '280k',
+    description: 'Active - Crew template library and rollout planning',
+    tasks: productTasksCrewAI,
+  },
+];
+
 export const MOCK_DEPARTMENTS: Department[] = [
   { id: 'strategy', name: 'Strategy and Planning', icon: TrendingUp, status: 'healthy', nodeCount: 6, processes: [] },
   { id: 'finance', name: 'Finance and Controls', icon: Activity, status: 'warning', nodeCount: 8, processes: financeProcesses },
-  { id: 'legal', name: 'Legal, Compliance, Privacy', icon: Gavel, status: 'healthy', nodeCount: 5, processes: [] },
-  { id: 'risk', name: 'Risk and Security', icon: Shield, status: 'healthy', nodeCount: 6, processes: [] },
+  { id: 'legal', name: 'Legal, Compliance, Privacy', icon: Gavel, status: 'idle', nodeCount: 5, processes: [] },
+  { id: 'risk', name: 'Risk and Security', icon: Shield, status: 'healthy', nodeCount: 6, processes: riskSecurityProcesses },
   { id: 'people', name: 'People Ops (HR)', icon: Users, status: 'idle', nodeCount: 4, processes: peopleOpsProcesses },
   { id: 'marketing', name: 'Marketing and Growth', icon: Megaphone, status: 'healthy', nodeCount: 12, processes: marketingProcesses },
-  { id: 'sales', name: 'Sales and Partnerships', icon: Tag, status: 'healthy', nodeCount: 10, processes: [] },
+  { id: 'sales', name: 'Sales and Partnerships', icon: Tag, status: 'idle', nodeCount: 10, processes: [] },
   { id: 'support', name: 'Customer Support and Success', icon: Headphones, status: 'error', nodeCount: 7, processes: [] },
-  { id: 'product', name: 'Product Management', icon: Package, status: 'healthy', nodeCount: 9, processes: [] },
+  { id: 'product', name: 'Product Management', icon: Package, status: 'healthy', nodeCount: 9, processes: productProcesses },
   { id: 'engineering', name: 'Engineering and Data', icon: Code, status: 'healthy', nodeCount: 18, processes: engineeringProcesses },
-  { id: 'it', name: 'IT and Workplace Tech', icon: Server, status: 'healthy', nodeCount: 6, processes: [] },
+  { id: 'it', name: 'IT and Workplace Tech', icon: Server, status: 'healthy', nodeCount: 6, processes: itProcesses },
   { id: 'ops', name: 'Operations and Supply Chain', icon: Settings, status: 'idle', nodeCount: 5, processes: [] },
 ];
 
@@ -538,9 +838,9 @@ export const MOCK_CLUSTER_SUMMARY: ClusterSummary = {
   avgWorkload: 68,
   avgWorkloadLabel: 'Stable Cluster Health',
   nodesOptimal: 92,
-  healthyNodes: 128,
+  healthyNodes: 27,
   warningNodes: 11,
-  idleNodes: 3,
+  idleNodes: 104,
   errorNodes: 0,
 };
 
