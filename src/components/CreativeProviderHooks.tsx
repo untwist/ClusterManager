@@ -6,39 +6,36 @@
  */
 
 import React from 'react';
-import { Video, ImageIcon, Zap } from 'lucide-react';
+import { Video, ImageIcon, KeyRound } from 'lucide-react';
 import { CREATIVE_PROVIDERS } from '../data';
 import type { CreativeProvider } from '../data';
 
-function ProviderCard({ p }: { p: CreativeProvider }) {
+function providerSummary(p: CreativeProvider): string {
+  if (p.capabilities.includes('video') && p.capabilities.includes('image')) return 'Image & video';
+  if (p.capabilities.includes('video')) return 'Short-form video ads';
+  return 'Static and concept art';
+}
+
+function ProviderRow({ p }: { p: CreativeProvider }) {
   const Icon = p.capabilities.includes('video') ? Video : ImageIcon;
   return (
-    <div className="p-4 rounded-lg border border-border-dark bg-slate-800/30 hover:bg-slate-800/50 transition-colors">
-      <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-          <Icon className="w-5 h-5 text-primary" />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-bold text-slate-200">{p.name}</span>
-            {!p.connected && (
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-600/50 text-slate-400 border border-border-dark">
-                Connect API key
-              </span>
-            )}
-          </div>
-          <p className="text-[11px] text-slate-500 mt-0.5">{p.description}</p>
-          <div className="flex flex-wrap gap-1 mt-2">
-            {p.capabilities.map((c) => (
-              <span
-                key={c}
-                className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-700 text-slate-400"
-              >
-                {c}
-              </span>
-            ))}
-          </div>
-        </div>
+    <div className="flex items-center gap-3 py-3 first:pt-0 last:pb-0 border-b border-border-dark/60 last:border-0">
+      <div className="w-9 h-9 rounded-lg bg-slate-800/80 flex items-center justify-center shrink-0 border border-border-dark/60">
+        <Icon className="w-4 h-4 text-slate-400" />
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-slate-200">{p.name}</p>
+        <p className="text-xs text-slate-500">{providerSummary(p)}</p>
+      </div>
+      <div className="shrink-0">
+        {p.connected ? (
+          <span className="text-[10px] font-medium text-emerald-500/90 uppercase tracking-wide">Connected</span>
+        ) : (
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-medium bg-slate-700/60 text-slate-400 border border-border-dark">
+            <KeyRound className="w-3 h-3" />
+            Add key
+          </span>
+        )}
       </div>
     </div>
   );
@@ -47,16 +44,17 @@ function ProviderCard({ p }: { p: CreativeProvider }) {
 export function CreativeProviderHooks() {
   return (
     <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm">
-      <h4 className="text-sm font-bold uppercase tracking-wide mb-2 flex items-center gap-2">
-        <Zap className="w-4 h-4 text-primary" />
-        Advertising pipeline APIs
-      </h4>
-      <p className="text-[11px] text-slate-500 font-medium mb-4">
-        Connect API keys in env to enable image and video generation.
-      </p>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="mb-4">
+        <h4 className="text-sm font-bold text-slate-200 tracking-tight">
+          Advertising pipeline
+        </h4>
+        <p className="text-xs text-slate-500 mt-1">
+          Image and video generation for campaigns. Add API keys in env to enable.
+        </p>
+      </div>
+      <div className="space-y-0">
         {CREATIVE_PROVIDERS.map((p) => (
-          <ProviderCard key={p.id} p={p} />
+          <ProviderRow key={p.id} p={p} />
         ))}
       </div>
     </div>

@@ -7,11 +7,15 @@
 
 import React, { useMemo } from 'react';
 import { motion } from 'motion/react';
+import { TransformWrapper, TransformComponent } from 'react-zoom-pan-pinch';
 import type { NodeRole, TopologyEdge } from '../data';
 
 const NODE_RADIUS = 28;
+const CRITIQUE_RADIUS = 6;
 const LEVEL_HEIGHT = 72;
 const NODE_GAP = 24;
+const MAIN_CIRCLE_R = NODE_RADIUS - 2;
+const CRITIQUE_OFFSET = (MAIN_CIRCLE_R + CRITIQUE_RADIUS) * 0.85;
 
 interface DepartmentNodeTopologyProps {
   roles: NodeRole[];
@@ -87,26 +91,31 @@ export function DepartmentNodeTopology({ roles, edges, title = 'Node Topology' }
   return (
     <div className="bg-card-dark rounded-xl border border-border-dark p-6 shadow-sm overflow-hidden">
       <h4 className="text-sm font-bold uppercase tracking-wide mb-4">{title}</h4>
-      <div className="rounded-lg bg-slate-800/20 border border-border-dark overflow-auto" style={{ minHeight: 200 }}>
-        <svg
-          width={width}
-          height={height}
-          className="overflow-visible"
-          style={{ minWidth: '100%' }}
-        >
-          <defs>
-            <marker
-              id="arrowhead"
-              markerWidth="8"
-              markerHeight="6"
-              refX="7"
-              refY="3"
-              orient="auto"
+      <div className="rounded-lg bg-slate-800/20 border border-border-dark overflow-hidden" style={{ height: 320 }}>
+        <TransformWrapper minScale={0.5} maxScale={4} limitToBounds>
+          <TransformComponent
+            wrapperStyle={{ width: '100%', height: '100%' }}
+            contentStyle={{ width: '100%', height: '100%', minWidth: width, minHeight: height }}
+          >
+            <svg
+              width={width}
+              height={height}
+              className="overflow-visible"
+              style={{ minWidth: '100%' }}
             >
-              <polygon points="0 0, 8 3, 0 6" fill="rgb(100 116 139)" />
-            </marker>
-          </defs>
-          {edges.map((edge) => {
+              <defs>
+                <marker
+                  id="arrowhead"
+                  markerWidth="8"
+                  markerHeight="6"
+                  refX="7"
+                  refY="3"
+                  orient="auto"
+                >
+                  <polygon points="0 0, 8 3, 0 6" fill="rgb(100 116 139)" />
+                </marker>
+              </defs>
+              {edges.map((edge) => {
             const from = positions.get(edge.fromRoleId);
             const to = positions.get(edge.toRoleId);
             if (!from || !to) return null;
@@ -131,8 +140,8 @@ export function DepartmentNodeTopology({ roles, edges, title = 'Node Topology' }
                 markerEnd="url(#arrowhead)"
               />
             );
-          })}
-          {roles.map((node) => {
+              })}
+              {roles.map((node) => {
             const pos = positions.get(node.id);
             if (!pos) return null;
             return (
@@ -141,13 +150,26 @@ export function DepartmentNodeTopology({ roles, edges, title = 'Node Topology' }
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.02 * roles.indexOf(node) }}
-                  r={NODE_RADIUS - 2}
+                  r={MAIN_CIRCLE_R}
                   cx={pos.x}
                   cy={pos.y}
                   fill="rgb(30 41 59)"
                   stroke="rgb(37 99 235)"
                   strokeWidth={2}
                   className="cursor-default"
+                />
+                <motion.circle
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.02 * roles.indexOf(node) + 0.05 }}
+                  r={CRITIQUE_RADIUS}
+                  cx={pos.x + CRITIQUE_OFFSET}
+                  cy={pos.y - CRITIQUE_OFFSET}
+                  fill="none"
+                  stroke="rgb(239 68 68)"
+                  strokeWidth={1.5}
+                  className="cursor-default"
+                  title="Critique / review step"
                 />
                 <text
                   x={pos.x}
@@ -167,15 +189,20 @@ export function DepartmentNodeTopology({ roles, edges, title = 'Node Topology' }
                 </text>
               </g>
             );
-          })}
-        </svg>
+              })}
+            </svg>
+          </TransformComponent>
+        </TransformWrapper>
       </div>
-      <div className="mt-3 flex items-center gap-4 text-[10px] font-bold text-slate-500">
+      <div className="mt-3 flex flex-wrap items-center gap-4 text-[10px] font-bold text-slate-500">
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-4 border-t border-slate-500" /> Reports to
         </span>
         <span className="flex items-center gap-1.5">
           <span className="inline-block w-4 border-t border-dashed border-slate-500" /> Collaborates with
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span className="inline-block w-3 h-3 rounded-full border-2 border-red-500 border-solid" /> Critique/Review
         </span>
       </div>
     </div>
