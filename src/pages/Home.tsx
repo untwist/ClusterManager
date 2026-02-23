@@ -154,7 +154,7 @@ export function Home() {
           </div>
         </KpiCard>
 
-        <KpiCard title="Cluster Status">
+        <KpiCard title={`Cluster Status (${CLUSTER_SUMMARY?.totalAgents ?? 0})`}>
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-medium text-slate-400">Healthy Nodes</span>
