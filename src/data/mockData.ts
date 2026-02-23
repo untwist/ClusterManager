@@ -44,6 +44,9 @@ export const MOCK_AGENTS: Agent[] = [
   { id: 'agent-mkt-3', name: 'Strat-Digital-1', roleTitle: 'Digital Strategist', departmentId: 'marketing' },
   { id: 'agent-mkt-4', name: 'Media-Plan-1', roleTitle: 'Media Planner', departmentId: 'marketing' },
   { id: 'agent-legal-1', name: 'Legal-Agent-Alpha', roleTitle: 'Contract Analysis', departmentId: 'legal' },
+  { id: 'agent-strat-1', name: 'Strat-Lead-01', roleTitle: 'Strategy Lead', departmentId: 'strategy' },
+  { id: 'agent-strat-2', name: 'Plan-Analyst-3', roleTitle: 'Strategy Analyst', departmentId: 'strategy' },
+  { id: 'agent-strat-3', name: 'OKR-Track-2', roleTitle: 'Planning & OKR', departmentId: 'strategy' },
   { id: 'agent-risk-1', name: 'Risk-Shield-09', roleTitle: 'Fraud Detection', departmentId: 'risk' },
   { id: 'agent-risk-2', name: 'Guard-LLM-3', roleTitle: 'Security Engineer', departmentId: 'risk' },
   { id: 'agent-risk-3', name: 'Threat-Scan-7', roleTitle: 'Risk Analyst', departmentId: 'risk' },
@@ -134,6 +137,163 @@ const financeProcesses: Process[] = [
     tokens: '1.2M',
     description: 'Warning - Data mismatch detected',
     tasks: [],
+  },
+];
+
+/** Strategy and Planning: strategic planning cycle, OKRs, initiative prioritization */
+const strategyTasks: Task[] = [
+  {
+    id: 'env-scan',
+    name: 'Environmental Scan',
+    status: 'healthy',
+    description: 'PESTEL and competitive landscape summary completed. Key risks and opportunities documented.',
+    timestamp: 'Completed 1d ago',
+    assignedAgentIds: ['agent-strat-2', 'agent-strat-1'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-2', role: 'Strategy Analyst', status: 'approved', approvedBy: 'agent-strat-1' },
+      { order: 2, agentId: 'agent-strat-1', role: 'Strategy Lead', status: 'approved' },
+    ],
+  },
+  {
+    id: 'okr-draft',
+    name: 'Draft OKRs & Targets',
+    status: 'running',
+    description: 'Q2 OKRs aligned to board priorities. 3/5 pillars have measurable key results.',
+    progress: 72,
+    assignedAgentIds: ['agent-strat-1', 'agent-strat-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-1', role: 'Strategy Lead', status: 'approved' },
+      { order: 2, agentId: 'agent-strat-3', role: 'Planning & OKR', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'scenario-model',
+    name: 'Scenario Modeling',
+    status: 'running',
+    description: 'Base / upside / downside cases for revenue and capacity. Sensitivity runs in progress.',
+    progress: 55,
+    assignedAgentIds: ['agent-strat-2', 'agent-strat-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-2', role: 'Strategy Analyst', status: 'approved' },
+      { order: 2, agentId: 'agent-strat-3', role: 'Planning & OKR', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'exec-review-pack',
+    name: 'Exec Review Pack',
+    status: 'idle',
+    description: 'Slides and narrative for leadership offsite. Blocked on OKR sign-off.',
+    assignedAgentIds: ['agent-strat-1', 'agent-strat-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-1', role: 'Strategy Lead', status: 'pending' },
+      { order: 2, agentId: 'agent-strat-2', role: 'Strategy Analyst', status: 'pending' },
+    ],
+  },
+];
+
+const strategyInitiativeTasks: Task[] = [
+  {
+    id: 'initiative-intake',
+    name: 'Initiative Intake',
+    status: 'healthy',
+    description: 'Backlog triaged. 12 initiatives logged with owners and rough scope.',
+    timestamp: 'Completed 4h ago',
+    assignedAgentIds: ['agent-strat-2', 'agent-strat-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-2', role: 'Strategy Analyst', status: 'approved' },
+      { order: 2, agentId: 'agent-strat-3', role: 'Planning & OKR', status: 'approved' },
+    ],
+  },
+  {
+    id: 'scoring-prioritization',
+    name: 'Scoring & Prioritization',
+    status: 'running',
+    description: 'RICE and strategic fit scoring. Top 5 initiatives shortlisted for roadmap.',
+    progress: 80,
+    assignedAgentIds: ['agent-strat-1', 'agent-strat-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-2', role: 'Strategy Analyst', status: 'approved' },
+      { order: 2, agentId: 'agent-strat-1', role: 'Strategy Lead', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'roadmap-alignment',
+    name: 'Roadmap Alignment',
+    status: 'idle',
+    description: 'Map initiatives to product and eng roadmaps; flag dependencies.',
+    assignedAgentIds: ['agent-strat-3', 'agent-strat-1'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-3', role: 'Planning & OKR', status: 'pending' },
+      { order: 2, agentId: 'agent-strat-1', role: 'Strategy Lead', status: 'pending' },
+    ],
+  },
+];
+
+const strategyOKRTasks: Task[] = [
+  {
+    id: 'target-setting',
+    name: 'Target Setting',
+    status: 'healthy',
+    description: 'Annual and quarterly targets locked. Cascaded to department leads.',
+    timestamp: 'Completed 3d ago',
+    assignedAgentIds: ['agent-strat-1', 'agent-strat-3'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-1', role: 'Strategy Lead', status: 'approved' },
+      { order: 2, agentId: 'agent-strat-3', role: 'Planning & OKR', status: 'approved' },
+    ],
+  },
+  {
+    id: 'progress-rollup',
+    name: 'Progress Rollup',
+    status: 'running',
+    description: 'Weekly OKR progress aggregation from departments. 4/6 departments reported.',
+    progress: 68,
+    assignedAgentIds: ['agent-strat-3', 'agent-strat-2'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-3', role: 'Planning & OKR', status: 'in_progress' },
+      { order: 2, agentId: 'agent-strat-2', role: 'Strategy Analyst', status: 'in_progress' },
+    ],
+  },
+  {
+    id: 'variance-commentary',
+    name: 'Variance Commentary',
+    status: 'idle',
+    description: 'Narrative for at-risk and ahead-of-plan KPIs for board report.',
+    assignedAgentIds: ['agent-strat-2', 'agent-strat-1'],
+    workflowSteps: [
+      { order: 1, agentId: 'agent-strat-2', role: 'Strategy Analyst', status: 'pending' },
+      { order: 2, agentId: 'agent-strat-1', role: 'Strategy Lead', status: 'pending' },
+    ],
+  },
+];
+
+const strategyProcesses: Process[] = [
+  {
+    id: 'strategic-planning-cycle',
+    name: 'Strategic Planning Cycle',
+    status: 'running',
+    workload: 68,
+    tokens: '520k',
+    description: 'Active - 3/4 Subtasks in progress or complete',
+    tasks: strategyTasks,
+  },
+  {
+    id: 'initiative-prioritization',
+    name: 'Initiative Prioritization',
+    status: 'running',
+    workload: 58,
+    tokens: '310k',
+    description: 'Active - 2/3 Subtasks complete',
+    tasks: strategyInitiativeTasks,
+  },
+  {
+    id: 'okr-kpi-tracking',
+    name: 'OKR & KPI Tracking',
+    status: 'running',
+    workload: 72,
+    tokens: '390k',
+    description: 'Weekly rollup and variance analysis in progress',
+    tasks: strategyOKRTasks,
   },
 ];
 
@@ -641,7 +801,7 @@ const productProcesses: Process[] = [
 ];
 
 export const MOCK_DEPARTMENTS: Department[] = [
-  { id: 'strategy', name: 'Strategy and Planning', icon: TrendingUp, status: 'healthy', nodeCount: 6, processes: [] },
+  { id: 'strategy', name: 'Strategy and Planning', icon: TrendingUp, status: 'healthy', nodeCount: 6, processes: strategyProcesses },
   { id: 'finance', name: 'Finance and Controls', icon: Activity, status: 'warning', nodeCount: 8, processes: financeProcesses },
   { id: 'legal', name: 'Legal, Compliance, Privacy', icon: Gavel, status: 'idle', nodeCount: 5, processes: [] },
   { id: 'risk', name: 'Risk and Security', icon: Shield, status: 'healthy', nodeCount: 6, processes: riskSecurityProcesses },
